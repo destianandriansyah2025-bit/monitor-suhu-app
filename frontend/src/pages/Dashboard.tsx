@@ -15,6 +15,9 @@ import {
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
+// Get API base URL
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 export default function Dashboard() {
   const { data: current, isLoading: isCurrentLoading } = useCurrentReading();
   const { data: history, isLoading: isHistoryLoading } = useReadings('day', 24);
@@ -34,7 +37,7 @@ export default function Dashboard() {
   useEffect(() => {
     const checkStatus = async () => {
       try {
-        const res = await fetch('/api/device-status/ESP-SERVER-01');
+        const res = await fetch(`${API_BASE}/api/device-status/ESP-SERVER-01`);
         const status = await res.json();
         setDeviceStatus(status);
       } catch (error) {
@@ -51,7 +54,7 @@ export default function Dashboard() {
   useEffect(() => {
     const getConfig = async () => {
       try {
-        const res = await fetch('/api/device-config/ESP-SERVER-01');
+        const res = await fetch(`${API_BASE}/api/device-config/ESP-SERVER-01`);
         const config = await res.json();
         setDeviceConfig(config);
       } catch (error) {

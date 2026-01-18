@@ -9,6 +9,9 @@ import { api } from "@shared/routes";
 import { useState, useEffect } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
+// Get API base URL
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 export default function Settings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -56,7 +59,7 @@ export default function Settings() {
   // Send config mutation (ESP8266 only)
   const sendConfig = useMutation({
     mutationFn: async (configData: any) => {
-      const res = await fetch('/api/devices/ESP-SERVER-01/config', {
+      const res = await fetch(`${API_BASE}/api/devices/ESP-SERVER-01/config`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(configData)
@@ -82,7 +85,7 @@ export default function Settings() {
   // Save notification schedule mutation (separate)
   const saveNotificationSchedule = useMutation({
     mutationFn: async (scheduleData: any) => {
-      const res = await fetch('/api/notification-schedule/ESP-SERVER-01', {
+      const res = await fetch(`${API_BASE}/api/notification-schedule/ESP-SERVER-01`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(scheduleData)
