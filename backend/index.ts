@@ -14,6 +14,35 @@ declare module "http" {
   }
 }
 
+// CORS middleware - MUST be before other middleware
+app.use((req, res, next) => {
+  // Allow Firebase Hosting and localhost
+  const allowedOrigins = [
+    'https://server-room-monitor-84c8a.web.app',
+    'https://server-room-monitor-84c8a.firebaseapp.com',
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://localhost:5000'
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin as string)) {
+    res.setHeader('Access-Control-Allow-Origin', origin as string);
+  }
+  
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+  
+  next();
+});
+
 app.use(
   express.json({
     verify: (req, _res, buf) => {
