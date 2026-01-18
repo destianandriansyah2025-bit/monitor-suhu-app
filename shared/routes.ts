@@ -1,5 +1,12 @@
 import { z } from 'zod';
-import { insertReadingSchema, readings, insertDeviceSchema, devices, insertAlertSchema, alerts } from './schema';
+import {
+  insertReadingSchema,
+  insertDeviceSchema,
+  insertAlertSchema,
+  type Reading,
+  type Device,
+  type Alert
+} from './schema';
 
 // Get API base URL from environment
 const getApiBaseUrl = () => {
@@ -19,7 +26,7 @@ export const api = {
       method: 'GET' as const,
       path: `${API_BASE}/api/readings/current`,
       responses: {
-        200: z.custom<typeof readings.$inferSelect>().nullable(),
+        200: z.custom<Reading>().nullable(),
       },
     },
     list: {
@@ -30,7 +37,7 @@ export const api = {
         limit: z.coerce.number().optional(),
       }).optional(),
       responses: {
-        200: z.array(z.custom<typeof readings.$inferSelect>()),
+        200: z.array(z.custom<Reading>()),
       },
     },
     create: {
@@ -38,7 +45,7 @@ export const api = {
       path: `${API_BASE}/api/sensor`,
       input: insertReadingSchema,
       responses: {
-        201: z.custom<typeof readings.$inferSelect>(),
+        201: z.custom<Reading>(),
         400: z.object({ message: z.string() }),
       },
     },
@@ -48,14 +55,14 @@ export const api = {
       method: 'GET' as const,
       path: `${API_BASE}/api/devices`,
       responses: {
-        200: z.array(z.custom<typeof devices.$inferSelect>()),
+        200: z.array(z.custom<Device>()),
       },
     },
     get: {
       method: 'GET' as const,
       path: `${API_BASE}/api/devices/:id`,
       responses: {
-        200: z.custom<typeof devices.$inferSelect>(),
+        200: z.custom<Device>(),
         404: z.object({ message: z.string() }),
       },
     },
@@ -64,7 +71,7 @@ export const api = {
       path: `${API_BASE}/api/devices`,
       input: insertDeviceSchema,
       responses: {
-        201: z.custom<typeof devices.$inferSelect>(),
+        201: z.custom<Device>(),
         400: z.object({ message: z.string() }),
       },
     },
@@ -73,7 +80,7 @@ export const api = {
       path: `${API_BASE}/api/devices/:id`,
       input: insertDeviceSchema.partial(),
       responses: {
-        200: z.custom<typeof devices.$inferSelect>(),
+        200: z.custom<Device>(),
         404: z.object({ message: z.string() }),
       },
     },
@@ -89,7 +96,7 @@ export const api = {
         deviceEnabled: z.boolean().optional(),
       }),
       responses: {
-        200: z.custom<typeof devices.$inferSelect>(),
+        200: z.custom<Device>(),
         404: z.object({ message: z.string() }),
       },
     },
@@ -104,7 +111,7 @@ export const api = {
         limit: z.coerce.number().optional(),
       }).optional(),
       responses: {
-        200: z.array(z.custom<typeof alerts.$inferSelect>()),
+        200: z.array(z.custom<Alert>()),
       },
     },
     create: {
@@ -112,7 +119,7 @@ export const api = {
       path: `${API_BASE}/api/alerts`,
       input: insertAlertSchema,
       responses: {
-        201: z.custom<typeof alerts.$inferSelect>(),
+        201: z.custom<Alert>(),
         400: z.object({ message: z.string() }),
       },
     },
@@ -120,7 +127,7 @@ export const api = {
       method: 'PUT' as const,
       path: `${API_BASE}/api/alerts/:id/acknowledge`,
       responses: {
-        200: z.custom<typeof alerts.$inferSelect>(),
+        200: z.custom<Alert>(),
         404: z.object({ message: z.string() }),
       },
     },
@@ -128,13 +135,13 @@ export const api = {
 };
 
 export function buildUrl(path: string, params?: Record<string, string | number>): string {
-    let url = path;
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (url.includes(`:${key}`)) {
-          url = url.replace(`:${key}`, String(value));
-        }
-      });
-    }
-    return url;
+  let url = path;
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (url.includes(`:${key}`)) {
+        url = url.replace(`:${key}`, String(value));
+      }
+    });
+  }
+  return url;
 }

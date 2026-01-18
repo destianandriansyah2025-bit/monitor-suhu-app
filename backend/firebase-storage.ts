@@ -1,4 +1,4 @@
-import { storage as memoryStorage } from './storage';
+
 
 interface FirebaseData {
   devices: Record<string, any>;
@@ -23,16 +23,16 @@ class FirebaseStorage {
   async getLatestReading(deviceId: string = 'ESP-SERVER-01') {
     try {
       const sensorData = await this.fetchFirebase(`/devices/${deviceId}/sensor_data`);
-      
+
       if (sensorData) {
         const readings = Object.values(sensorData);
         const latest = readings[readings.length - 1] as any;
-        
+
         if (latest) {
           // Fix ESP8266 invalid timestamps: only accept 2020-2027 range
           const timestamp = latest.timestamp * 1000;
           const isValidTime = timestamp > new Date('2020-01-01').getTime() && timestamp < new Date('2027-01-01').getTime();
-          
+
           return {
             id: Date.now(),
             temperature: latest.temperature,
@@ -53,14 +53,14 @@ class FirebaseStorage {
   async getRecentReadings(deviceId: string = 'ESP-SERVER-01', limit: number = 50) {
     try {
       const sensorData = await this.fetchFirebase(`/devices/${deviceId}/sensor_data`);
-      
+
       if (sensorData) {
         const readings = Object.values(sensorData).slice(-limit).map((reading: any, index) => {
           const timestamp = reading.timestamp * 1000;
           // Fix ESP8266 invalid timestamps: only accept 2020-2027 range
           const isValidTime = timestamp > new Date('2020-01-01').getTime() && timestamp < new Date('2027-01-01').getTime();
           const now = new Date();
-          
+
           return {
             id: index,
             temperature: reading.temperature,
@@ -69,14 +69,14 @@ class FirebaseStorage {
             sensorId: deviceId
           };
         });
-        
+
         return readings;
       }
       return [];
     } catch (error) {
       console.error('Failed to get recent readings:', error.message);
       const now = new Date();
-      return Array.from({length: 10}, (_, i) => ({
+      return Array.from({ length: 10 }, (_, i) => ({
         id: i,
         temperature: 29.8 + (Math.random() - 0.5),
         humidity: 63.8 + (Math.random() - 0.5) * 2,
@@ -91,15 +91,15 @@ class FirebaseStorage {
     try {
       // Try to get status first
       const status = await this.fetchFirebase(`/devices/${deviceId}/status`);
-      
+
       if (status && status.last_seen) {
         const lastSeen = new Date(status.last_seen * 1000);
         const now = new Date();
         const diffMinutes = (now.getTime() - lastSeen.getTime()) / (1000 * 60);
-        
+
         // Check if timestamp is reasonable (not in future, not too old)
         const isReasonableTime = diffMinutes >= 0 && diffMinutes < (24 * 60); // Within last 24 hours
-        
+
         if (isReasonableTime) {
           return {
             id: deviceId,
@@ -111,23 +111,23 @@ class FirebaseStorage {
           };
         }
       }
-      
+
       // Fallback: use latest sensor data timestamp
       const sensorData = await this.fetchFirebase(`/devices/${deviceId}/sensor_data`);
-      
+
       if (sensorData) {
         const readings = Object.values(sensorData);
         const latest = readings[readings.length - 1] as any;
-        
+
         if (latest && latest.timestamp) {
           const timestamp = latest.timestamp * 1000;
           const isValidTime = timestamp > new Date('2020-01-01').getTime() && timestamp < new Date('2027-01-01').getTime();
-          
+
           if (isValidTime) {
             const lastSeen = new Date(timestamp);
             const now = new Date();
             const diffMinutes = (now.getTime() - lastSeen.getTime()) / (1000 * 60);
-            
+
             return {
               id: deviceId,
               name: 'Server Room Main',
@@ -139,10 +139,10 @@ class FirebaseStorage {
           }
         }
       }
-      
+
       return {
         id: deviceId,
-        name: 'Server Room Main', 
+        name: 'Server Room Main',
         status: 'offline',
         lastSeen: null,
         isOnline: false,
